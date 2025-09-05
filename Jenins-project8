@@ -1,0 +1,63 @@
+pipeline{
+    agent any
+    environment{
+        PATH = "/opt/maven3/bin:$PATH"
+    }
+    stages{
+        stage("Git Checkout"){
+            steps{
+                git credentialsId: 'javahome2', url: 'https://github.com/raina0583/myweb.git'
+            }
+        }
+        stage('Static Code Analysis') {
+      environment {
+        SONAR_URL = "http://52.199.42.84:9000"
+      }
+      steps {
+        withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
+          sh 'mvn sonar:sonar -Dsonar.login=$SONAR_AUTH_TOKEN -Dsonar.host.url=${SONAR_URL}'
+        }
+      }
+    }
+    stage("Maven Build"){
+            steps{
+                sh "mvn clean package"
+                
+            }
+        }
+        stage('Upload War To Nexus'){
+            steps{
+                  nexusArtifactUploader artifacts: [
+                       [
+                            artifactId: 'myweb', 
+                            classifier: '', 
+                            file: "target/myweb-8.2.0.war", 
+                            type: 'war'
+                       ]
+                  ], 
+                  credentialsId: 'nexus3', 
+                  groupId: 'in.javahome', 
+                  nexusUrl: '172.31.46.119:8081', 
+                  nexusVersion: 'nexus3', 
+                  protocol: 'http', 
+                  repository: 'sample-releases', 
+                  version: '8.2.0'  
+              }
+            }
+        stage('Build Docker Image'){
+            steps{
+                 sh 'docker build -t rainam0583/spring-boot-mongo .'
+                 sh 'docker build -t tomcat:${BUILD_NUMBER} .'
+                 sh 'docker run -itd --name srini27 -p 3300:8080 tomcat:${BUILD_NUMBER}'
+             }
+         }
+        stage('Push Docker Image'){
+             steps{
+                  withCredentials([string(credentialsId: 'DOCKER_HUB_CREDENTIALS', variable: 'DOCKER_HUB_CREDENTIALS')]) {
+                      sh "docker login -u rainam0583 -p ${DOCKER_HUB_CREDENTIALS}"
+            }
+            sh 'docker push rainam0583/spring-boot-mongo'
+        }
+      }
+}
+}
