@@ -11,7 +11,7 @@ pipeline{
         }
         stage('Static Code Analysis') {
       environment {
-        SONAR_URL = "http://13.53.129.87:9000"
+        SONAR_URL = "http://13.61.104.126:9000"
       }
       steps {
         withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
@@ -37,7 +37,7 @@ pipeline{
                   ], 
                   credentialsId: 'nexus3', 
                   groupId: 'in.javahome', 
-                  nexusUrl: '172.31.42.248:8081', 
+                  nexusUrl: '172.31.44.58:8081', 
                   nexusVersion: 'nexus3', 
                   protocol: 'http', 
                   repository: 'sample-releases', 
