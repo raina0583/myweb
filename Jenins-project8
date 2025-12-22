@@ -11,7 +11,7 @@ pipeline{
         }
         stage('Static Code Analysis') {
       environment {
-        SONAR_URL = "http://43.207.144.139:9000"
+        SONAR_URL = "http://35.78.246.88:9000"
       }
       steps {
         withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
@@ -37,7 +37,7 @@ pipeline{
                   ], 
                   credentialsId: 'nexus3', 
                   groupId: 'in.javahome', 
-                  nexusUrl: '172.31.12.215:8081', 
+                  nexusUrl: '172.31.29.165:8081', 
                   nexusVersion: 'nexus3', 
                   protocol: 'http', 
                   repository: 'sample-releases', 
@@ -48,7 +48,7 @@ pipeline{
             steps{
                  sh 'docker build -t dinu0583/spring-boot-mongo .'
                  sh 'docker build -t tomcat:${BUILD_NUMBER} .'
-                 sh 'docker run -itd --name srini79 -p 3250:8080 tomcat:${BUILD_NUMBER}'
+                 sh 'docker run -itd --name srini81 -p 3350:8080 tomcat:${BUILD_NUMBER}'
              }
          }
         stage('Push Docker Image'){
